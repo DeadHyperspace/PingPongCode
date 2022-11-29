@@ -88,7 +88,7 @@ function loop(){
         ball.y = canvas.height - grid * 2;
         ball.dy *= -1;
     }
-    //TODO добавить счётчик очков и детектить куда улетел мяч, и обратный отсчёт перед подачей
+    //TODO добавить счётчик очков и детектить куда улетел мяч, и обратный отсчёт перед подачей, мб даже с визуальным эффектом
     //Проверяем не улител ли игровой мяч за поле
     if((ball.x < 0 || ball.x > canvas.width) && !ball.resetting){
         //Пометили что мяч ребутнут, чтобы не улететь в цикл
@@ -108,7 +108,7 @@ function loop(){
         ball.dx *= -1;
         ball.x = rightPaddle.x - ball.width;
     }
-    //Отрисовка игрового поля и мяча~
+    //Отрисовка игрового поля и мяча
     context.fillStyle = 'red';
     context.fillRect(ball.x, ball.y, ball.width, ball.height);
     context.fillStyle = 'lightgrey';
@@ -118,5 +118,27 @@ function loop(){
     for (let i = grid; i < canvas.height - grid; i += grid * 2) {
         context.fillRect(canvas.width / 2 - grid / 2, i, grid, grid);
     }
+    //Отслеживаем нажатия и отжатия клавиш
+    document.addEventListener('keydown', function (e) {
+        if (e.which === 38) {
+            rightPaddle.dy = -paddleSpeed;
+        } else if (e.which === 40) {
+            rightPaddle.dy = paddleSpeed;
+        }
+        if (e.which === 87) {
+            leftPaddle.dy = -paddleSpeed;
+        }
+        else if (e.which === 83) {
+            leftPaddle.dy = paddleSpeed;
+        }
+    });
+    document.addEventListener('keyup', function (e) {
+        if (e.which === 38 || e.which === 40) {
+            rightPaddle.dy = 0;
+        }
+        if (e.which === 83 || e.which === 87) {
+            leftPaddle.dy = 0;
+        }
+    });
 }
 window.requestAnimationFrame(loop);

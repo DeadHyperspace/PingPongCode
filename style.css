@@ -9,3 +9,18 @@ body{
     align-items: center;
     justify-content: center;
 }
+#workZone{
+    display: block;
+    align-items: center;
+    justify-content: center;
+    background: cornflowerblue;
+
+}
+#button {
+    position:relative;
+    top:40%;
+    left:30%;
+}
+canvas {
+    position:absolute;
+}

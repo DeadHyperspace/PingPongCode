@@ -1,5 +1,6 @@
 //Получаем поле из документа
 let canvas = document.getElementById('game');
+canvas.style.display="none";
 //Делаем это поле 2D
 let context = canvas.getContext('2d');
 //Указываем размер 1 игровой клетки
@@ -11,6 +12,43 @@ const maxPaddleY = canvas.height - grid - paddleHeight;
 //Указываем скорость объектов ( платформ, мяча)
 var paddleSpeed = 6;
 var ballSpeed = 5;
+//Переменная для определения стейта игры
+var gameState;
+//Перменные для кнопок
+//Получаем див, который мы настроили заранее и в котором будут находиться кнопки
+const workZoneDiv = document.getElementById("workZone")
+//Создаём кнопку и настраиваем её параметры
+const startBtn = document.createElement("BUTTON");
+startBtn.innerText = "Начать игру";
+startBtn.style.width = "500px";
+//Добавляем кнопку на див
+workZoneDiv.appendChild(startBtn);
+//По нажатию кнопки должны появиться ещё две с выбором режима игры, это будет выполняться в данной функции
+startBtn.onclick = function (){
+    let onePMBtn = document.createElement("BUTTON");
+    let twoPMBtn = document.createElement("BUTTON");
+    onePMBtn.innerText = "1 игрок";
+    onePMBtn.style.width = "500px";
+    twoPMBtn.innerText = "2 игрока";
+    twoPMBtn.style.width = "500px";
+    workZoneDiv.appendChild(onePMBtn);
+    workZoneDiv.appendChild(twoPMBtn);
+    startBtn.style.display="none";
+    onePMBtn.onclick = function(){
+        gameState = 0;
+        onePMBtn.style.display="none";
+        twoPMBtn.style.display="none";
+        canvas.style.display="flex";
+        console.log(gameState);
+    }
+    twoPMBtn.onclick = function(){
+        gameState = 1;
+        onePMBtn.style.display="none";
+        twoPMBtn.style.display="none";
+        canvas.style.display="flex";
+        console.log(gameState);
+    }
+}
 //Описываем платформы
 const leftPaddle = {
     //Ставим её по центру с левой стороны
@@ -141,4 +179,4 @@ function loop(){
         }
     });
 }
-window.requestAnimationFrame(loop);
+    window.requestAnimationFrame(loop);

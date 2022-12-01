@@ -35,14 +35,14 @@ startBtn.onclick = function (){
     workZoneDiv.appendChild(twoPMBtn);
     startBtn.style.display="none";
     onePMBtn.onclick = function(){
-        gameState = 0;
+        gameState = 1;
         onePMBtn.style.display="none";
         twoPMBtn.style.display="none";
         canvas.style.display="flex";
         console.log(gameState);
     }
     twoPMBtn.onclick = function(){
-        gameState = 1;
+        gameState = 0;
         onePMBtn.style.display="none";
         twoPMBtn.style.display="none";
         canvas.style.display="flex";
@@ -158,10 +158,12 @@ function loop(){
     }
     //Отслеживаем нажатия и отжатия клавиш
     document.addEventListener('keydown', function (e) {
-        if (e.which === 38) {
-            rightPaddle.dy = -paddleSpeed;
-        } else if (e.which === 40) {
-            rightPaddle.dy = paddleSpeed;
+        if(gameState == 0) {
+            if (e.which === 38) {
+                rightPaddle.dy = -paddleSpeed;
+            } else if (e.which === 40) {
+                rightPaddle.dy = paddleSpeed;
+            }
         }
         if (e.which === 87) {
             leftPaddle.dy = -paddleSpeed;
@@ -171,12 +173,22 @@ function loop(){
         }
     });
     document.addEventListener('keyup', function (e) {
-        if (e.which === 38 || e.which === 40) {
-            rightPaddle.dy = 0;
+        if(gameState == 0) {
+            if (e.which === 38 || e.which === 40) {
+                rightPaddle.dy = 0;
+            }
         }
         if (e.which === 83 || e.which === 87) {
             leftPaddle.dy = 0;
         }
     });
+    //Добавим бота в случае режима на 1 игрока
+    if(gameState == 1){
+            if(rightPaddle.y <= ball.y){
+                rightPaddle.dy+= paddleSpeed;
+            }else if(rightPaddle.y > ball.y) {
+                rightPaddle.dy -= paddleSpeed;
+            }
+    }
 }
     window.requestAnimationFrame(loop);

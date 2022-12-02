@@ -15,41 +15,13 @@ var paddleSpeedAI = 1;
 var ballSpeed = 5;
 //Переменная для определения стейта игры
 var gameState;
+//Очки и жизни
+var scorePoints1p = 0;
+var scorePoints2p = 0;
+var lifePoints;
 //Перменные для кнопок
 //Получаем див, который мы настроили заранее и в котором будут находиться кнопки
-const workZoneDiv = document.getElementById("workZone")
-//Создаём кнопку и настраиваем её параметры
-const startBtn = document.createElement("BUTTON");
-startBtn.innerText = "Начать игру";
-startBtn.style.width = "500px";
-//Добавляем кнопку на див
-workZoneDiv.appendChild(startBtn);
-//По нажатию кнопки должны появиться ещё две с выбором режима игры, это будет выполняться в данной функции
-startBtn.onclick = function () {
-    let onePMBtn = document.createElement("BUTTON");
-    let twoPMBtn = document.createElement("BUTTON");
-    onePMBtn.innerText = "1 игрок";
-    onePMBtn.style.width = "500px";
-    twoPMBtn.innerText = "2 игрока";
-    twoPMBtn.style.width = "500px";
-    workZoneDiv.appendChild(onePMBtn);
-    workZoneDiv.appendChild(twoPMBtn);
-    startBtn.style.display = "none";
-    onePMBtn.onclick = function () {
-        gameState = 1;
-        onePMBtn.style.display = "none";
-        twoPMBtn.style.display = "none";
-        canvas.style.display = "flex";
-        console.log(gameState);
-    }
-    twoPMBtn.onclick = function () {
-        gameState = 0;
-        onePMBtn.style.display = "none";
-        twoPMBtn.style.display = "none";
-        canvas.style.display = "flex";
-        console.log(gameState);
-    }
-}
+const workZoneDiv = document.getElementById("workZone");
 //Описываем платформы
 const leftPaddle = {
     //Ставим её по центру с левой стороны
@@ -82,7 +54,40 @@ const ball = {
     dx: ballSpeed,
     dy: -ballSpeed
 };
-
+//Создаём наши кнопки
+const startBtn = btnCreate("Начать игру","500px");
+var onePMBtn;
+var twoPMBtn;
+/*Создаём кнопку и настраиваем её параметры
+По нажатию кнопки должны появиться ещё две с выбором режима игры, это будет выполняться в данной функции
+Функция для создания кнопок
+*/
+function btnCreate(btnText, btnWidth) {
+    var btnName;
+    btnName = document.createElement("BUTTON");
+    btnName.innerText = btnText;
+    btnName.style.width = btnWidth;
+    workZoneDiv.appendChild(btnName);
+    return btnName;
+}
+//Функция для обработки выбора режима игры
+function stateBtnEvent(numb, buffBTN1, buffBTN2){
+    gameState = numb;
+    buffBTN1.style.display = "none";
+    buffBTN2.style.display = "none";
+    canvas.style.display = "flex";
+}
+//Функция кнопки начала игры
+function mainButtonHell() {
+    startBtn.removeEventListener("click",mainButtonHell);
+    onePMBtn = btnCreate("1 игрок","500px");
+    twoPMBtn = btnCreate("2 игрока","500px");
+    startBtn.style.display = "none";
+    onePMBtn.addEventListener("click",  function() {stateBtnEvent(1, onePMBtn, twoPMBtn)});
+    onePMBtn.removeEventListener("click",  function() {stateBtnEvent(1, onePMBtn, twoPMBtn)});
+    twoPMBtn.addEventListener("click", function() {stateBtnEvent(0, twoPMBtn, onePMBtn)});
+    twoPMBtn.removeEventListener("click", function() {stateBtnEvent(0, twoPMBtn, onePMBtn)});
+}
 //Функция проверки пересечения двух объектов
 function collides(obj1, obj2) {
     return obj1.x < obj2.x + obj2.width &&
@@ -90,8 +95,15 @@ function collides(obj1, obj2) {
         obj1.y < obj2.y + obj2.height &&
         obj1.y + obj1.height > obj2.y;
 }
-
-//TODO заменить повторяющийся код для платформ двумя вызовами 1 функции, написать эту функцию
+//Функция детекшона колизии платформ
+function platformCollision(paddleName){
+    if (paddleName.y < grid) {
+        paddleName.y = grid;
+    } else if (paddleName.y > maxPaddleY) {
+        paddleName.y = maxPaddleY;
+    }
+}
+startBtn.addEventListener("click",mainButtonHell);
 //Основной цикл игры
 function loop() {
     //Очистка игрового поля, этот метод окна(window) даст реквест браузеру о том, что необходимо перезапустить функцию для обновления анимации
@@ -100,24 +112,13 @@ function loop() {
     //Продолжаем движение платформ если они уже двигались
     leftPaddle.y += leftPaddle.dy;
     rightPaddle.y += rightPaddle.dy;
-    //Не даём обеим платформам вылезти за игровое поле
-    if (leftPaddle.y < grid) {
-        leftPaddle.y = grid;
-    } else if (leftPaddle.y > maxPaddleY) {
-        leftPaddle.y = maxPaddleY;
-    }
-    if (rightPaddle.y < grid) {
-        rightPaddle.y = grid;
-    } else if (rightPaddle.y > maxPaddleY) {
-        rightPaddle.y = maxPaddleY;
-    }
-
+    platformCollision(leftPaddle);
+    platformCollision(rightPaddle);
     //Рисуем платформы
     context.fillStyle = "purple";
     // Каждая платформа — прямоугольник
     context.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
     context.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
-
     //Продолжаем движение мяча, если он двигался
     ball.x += ball.dx;
     ball.y += ball.dy;
@@ -129,9 +130,17 @@ function loop() {
         ball.y = canvas.height - grid * 2;
         ball.dy *= -1;
     }
-    //TODO добавить счётчик очков и детектить куда улетел мяч, и обратный отсчёт перед подачей, мб даже с визуальным эффектом
     //Проверяем не улител ли игровой мяч за поле
     if ((ball.x < 0 || ball.x > canvas.width) && !ball.resetting) {
+        if(ball.x < 0){
+            if (gameState === 1) {
+                lifePoints -= 1;
+            }
+            scorePoints2p+=1;
+            //TODO пофиксить баг с лишним очком у 1 из игроков
+        }else if(ball.x >= 750){
+            scorePoints1p+=1;
+        }
         //Пометили что мяч ребутнут, чтобы не улететь в цикл
         ball.resetting = true;
         //Даём игрокам время на подготовку, меняем флаг ребута и ставим мяч по середине поля
@@ -139,7 +148,7 @@ function loop() {
             ball.resetting = false;
             ball.x = canvas.width / 2;
             ball.y = canvas.height / 2;
-        }, 2000);
+        }, 1000);
     }
     //Проверки пересечения мяча с платформами
     if (collides(ball, leftPaddle)) {
@@ -150,12 +159,14 @@ function loop() {
         ball.x = rightPaddle.x - ball.width;
     }
     //Отрисовка игрового поля и мяча
+    context.font = "48px serif";
+    context.strokeText(scorePoints1p, canvas.width/4, 50);
+    context.strokeText(scorePoints2p, canvas.width-canvas.width/4, 50);
     context.fillStyle = 'red';
     context.fillRect(ball.x, ball.y, ball.width, ball.height);
     context.fillStyle = 'lightgrey';
     context.fillRect(0, 0, canvas.width, grid);
     context.fillRect(0, canvas.height - grid, canvas.width, canvas.height);
-    //TODO Попробовать сделать узор вместо банальных пунктирных линий
     for (let i = grid; i < canvas.height - grid; i += grid * 2) {
         context.fillRect(canvas.width / 2 - grid / 2, i, grid, grid);
     }
